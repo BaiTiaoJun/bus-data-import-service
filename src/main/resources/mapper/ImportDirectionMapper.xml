@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jy.importservice.mapper.ImportDirectionMapper">
+  <resultMap id="BaseResultMap" type="com.jy.importservice.entity.ImportDirection">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="key_name" jdbcType="VARCHAR" property="keyName" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, key_name, value, type
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_import_direction
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectDicDataByType" resultType="com.jy.importservice.entity.ImportDirection">
+    select key_name keyName, value
+    from t_import_direction
+    where type = #{type}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_import_direction
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.jy.importservice.entity.ImportDirection">
+    insert into t_import_direction (id, key_name, value, 
+      type)
+    values (#{id,jdbcType=BIGINT}, #{keyName,jdbcType=VARCHAR}, #{value,jdbcType=VARCHAR}, 
+      #{type,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jy.importservice.entity.ImportDirection">
+    insert into t_import_direction
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="keyName != null">
+        key_name,
+      </if>
+      <if test="value != null">
+        value,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="keyName != null">
+        #{keyName,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null">
+        #{value,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jy.importservice.entity.ImportDirection">
+    update t_import_direction
+    <set>
+      <if test="keyName != null">
+        key_name = #{keyName,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null">
+        value = #{value,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jy.importservice.entity.ImportDirection">
+    update t_import_direction
+    set key_name = #{keyName,jdbcType=VARCHAR},
+      value = #{value,jdbcType=VARCHAR},
+      type = #{type,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jy.importservice.mapper.ImportRuleTableMapper">
+  <resultMap id="BaseResultMap" type="com.jy.importservice.entity.ImportRuleTable">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="rule_table_id" jdbcType="VARCHAR" property="ruleTableId" />
+    <result column="rule_id" jdbcType="VARCHAR" property="ruleId" />
+    <result column="data_source_id" jdbcType="VARCHAR" property="dataSourceId" />
+    <result column="target_table_name" jdbcType="VARCHAR" property="targetTableName" />
+    <result column="target_schema" jdbcType="VARCHAR" property="targetSchema" />
+    <result column="source_table_name" jdbcType="VARCHAR" property="sourceTableName" />
+    <result column="source_schema" jdbcType="VARCHAR" property="sourceSchema" />
+    <result column="is_dynamic_table" jdbcType="CHAR" property="isDynamicTable" />
+    <result column="dynamic_table_rule" jdbcType="VARCHAR" property="dynamicTableRule" />
+    <result column="dynamic_table_rule_value" jdbcType="INTEGER" property="dynamicTableRuleValue" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="city_code" jdbcType="CHAR" property="cityCode" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.jy.importservice.entity.ImportRuleTable">
+    <result column="target_column_list" jdbcType="LONGVARCHAR" property="targetColumnList" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, rule_table_id, rule_id, data_source_id, target_table_name,
+    target_schema, source_table_name, source_schema, is_dynamic_table, dynamic_table_rule, 
+    dynamic_table_rule_value, update_time, city_code
+  </sql>
+  <sql id="Blob_Column_List">
+    target_column_list
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_import_rule_table
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectTableByPage" resultType="importRuleTable">
+    select id, target_table_name targetTableName, target_schema targetSchema, source_table_name sourceTableName, source_schema sourceSchema
+    from t_import_rule_table
+    <where>
+      <if test="sourceSchema != null and sourceSchema != ''">
+        and source_schema like concat('%', ${sourceSchema}, '%')
+      </if>
+      <if test="sourceTableName != null and sourceTableName != ''">
+        and source_table_name like concat('%', ${sourceTableName}, '%')
+      </if>
+      <if test="targetSchema != null and targetSchema != ''">
+        and target_schema like concat('%', ${targetSchema}, '%')
+      </if>
+      <if test="targetTableName != null and targetTableName != ''">
+        and target_table_name like concat('%', ${targetTableName}, '%')
+      </if>
+    </where>
+    order by id asc
+    limit ${pageNo}, ${pageSize}
+  </select>
+  <select id="selectTableTotalSize" resultType="java.lang.Long">
+    select count(1)
+    from t_import_rule_table
+  </select>
+  <select id="lockResource" resultType="java.lang.Integer">
+    select 1
+    from t_import_rule_table
+    where id = #{id}
+    limit 1
+    for update
+  </select>
+  <select id="selectByRuleId" resultType="com.jy.importservice.entity.ImportRuleTable">
+    select r.source_database sourceDatabase, t.rule_table_id ruleTableId, t.source_schema sourceSchema,
+           t.source_table_name sourceTableName, t.city_code cityCode, i.tns_url tnsUrl, i.sqlldr_info_name sqlldrInfoName
+    from t_import_rule r
+    inner join t_import_rule_table t
+    on t.rule_id = r.rule_id
+    inner join t_import_sqlldr_info i
+    on r.sqlldr_info_id = i.sqlldr_info_id
+    where t.rule_id = #{ruleId}
+  </select>
+  <select id="selectTargetColumnListByRuleTableId" resultType="java.lang.String">
+    select target_column_list
+    from t_import_rule_table
+    where rule_table_id = #{ruleTableId}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_import_rule_table
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.jy.importservice.entity.ImportRuleTable">
+    insert into t_import_rule_table (id, rule_table_id, rule_id, 
+      data_source_id,
+      target_table_name, target_schema, source_table_name, 
+      source_schema, is_dynamic_table, dynamic_table_rule, 
+      dynamic_table_rule_value, update_time, city_code, 
+      target_column_list)
+    values (#{id,jdbcType=BIGINT}, #{ruleTableId,jdbcType=VARCHAR}, #{ruleId,jdbcType=VARCHAR}, 
+      #{dataSourceId,jdbcType=VARCHAR},
+      #{targetTableName,jdbcType=VARCHAR}, #{targetSchema,jdbcType=VARCHAR}, #{sourceTableName,jdbcType=VARCHAR}, 
+      #{sourceSchema,jdbcType=VARCHAR}, #{isDynamicTable,jdbcType=CHAR}, #{dynamicTableRule,jdbcType=VARCHAR}, 
+      #{dynamicTableRuleValue,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, #{cityCode,jdbcType=CHAR}, 
+      #{targetColumnList,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jy.importservice.entity.ImportRuleTable">
+    insert into t_import_rule_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="ruleTableId != null">
+        rule_table_id,
+      </if>
+      <if test="ruleId != null">
+        rule_id,
+      </if>
+      <if test="dataSourceId != null">
+        data_source_id,
+      </if>
+      <if test="targetTableName != null">
+        target_table_name,
+      </if>
+      <if test="targetSchema != null">
+        target_schema,
+      </if>
+      <if test="sourceTableName != null">
+        source_table_name,
+      </if>
+      <if test="sourceSchema != null">
+        source_schema,
+      </if>
+      <if test="isDynamicTable != null">
+        is_dynamic_table,
+      </if>
+      <if test="dynamicTableRule != null">
+        dynamic_table_rule,
+      </if>
+      <if test="dynamicTableRuleValue != null">
+        dynamic_table_rule_value,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="cityCode != null">
+        city_code,
+      </if>
+      <if test="targetColumnList != null">
+        target_column_list,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="ruleTableId != null">
+        #{ruleTableId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleId != null">
+        #{ruleId,jdbcType=VARCHAR},
+      </if>
+      <if test="dataSourceId != null">
+        #{dataSourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="targetTableName != null">
+        #{targetTableName,jdbcType=VARCHAR},
+      </if>
+      <if test="targetSchema != null">
+        #{targetSchema,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceTableName != null">
+        #{sourceTableName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceSchema != null">
+        #{sourceSchema,jdbcType=VARCHAR},
+      </if>
+      <if test="isDynamicTable != null">
+        #{isDynamicTable,jdbcType=CHAR},
+      </if>
+      <if test="dynamicTableRule != null">
+        #{dynamicTableRule,jdbcType=VARCHAR},
+      </if>
+      <if test="dynamicTableRuleValue != null">
+        #{dynamicTableRuleValue,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=CHAR},
+      </if>
+      <if test="targetColumnList != null">
+        #{targetColumnList,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jy.importservice.entity.ImportRuleTable">
+    update t_import_rule_table
+    <set>
+      <if test="ruleTableId != null">
+        rule_table_id = #{ruleTableId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleId != null">
+        rule_id = #{ruleId,jdbcType=VARCHAR},
+      </if>
+      <if test="dataSourceId != null">
+        data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="targetTableName != null">
+        target_table_name = #{targetTableName,jdbcType=VARCHAR},
+      </if>
+      <if test="targetSchema != null">
+        target_schema = #{targetSchema,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceTableName != null">
+        source_table_name = #{sourceTableName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceSchema != null">
+        source_schema = #{sourceSchema,jdbcType=VARCHAR},
+      </if>
+      <if test="isDynamicTable != null">
+        is_dynamic_table = #{isDynamicTable,jdbcType=CHAR},
+      </if>
+      <if test="dynamicTableRule != null">
+        dynamic_table_rule = #{dynamicTableRule,jdbcType=VARCHAR},
+      </if>
+      <if test="dynamicTableRuleValue != null">
+        dynamic_table_rule_value = #{dynamicTableRuleValue,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cityCode != null">
+        city_code = #{cityCode,jdbcType=CHAR},
+      </if>
+      <if test="targetColumnList != null">
+        target_column_list = #{targetColumnList,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.jy.importservice.entity.ImportRuleTable">
+    update t_import_rule_table
+    set rule_table_id = #{ruleTableId,jdbcType=VARCHAR},
+      rule_id = #{ruleId,jdbcType=VARCHAR},
+      data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      target_table_name = #{targetTableName,jdbcType=VARCHAR},
+      target_schema = #{targetSchema,jdbcType=VARCHAR},
+      source_table_name = #{sourceTableName,jdbcType=VARCHAR},
+      source_schema = #{sourceSchema,jdbcType=VARCHAR},
+      is_dynamic_table = #{isDynamicTable,jdbcType=CHAR},
+      dynamic_table_rule = #{dynamicTableRule,jdbcType=VARCHAR},
+      dynamic_table_rule_value = #{dynamicTableRuleValue,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      city_code = #{cityCode,jdbcType=CHAR},
+      target_column_list = #{targetColumnList,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jy.importservice.entity.ImportRuleTable">
+    update t_import_rule_table
+    set rule_table_id = #{ruleTableId,jdbcType=VARCHAR},
+      rule_id = #{ruleId,jdbcType=VARCHAR},
+      data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      target_table_name = #{targetTableName,jdbcType=VARCHAR},
+      target_schema = #{targetSchema,jdbcType=VARCHAR},
+      source_table_name = #{sourceTableName,jdbcType=VARCHAR},
+      source_schema = #{sourceSchema,jdbcType=VARCHAR},
+      is_dynamic_table = #{isDynamicTable,jdbcType=CHAR},
+      dynamic_table_rule = #{dynamicTableRule,jdbcType=VARCHAR},
+      dynamic_table_rule_value = #{dynamicTableRuleValue,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      city_code = #{cityCode,jdbcType=CHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

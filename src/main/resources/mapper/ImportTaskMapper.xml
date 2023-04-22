@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jy.importservice.mapper.ImportTaskMapper">
+  <resultMap id="BaseResultMap" type="com.jy.importservice.entity.ImportTask">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
+    <result column="rule_id" jdbcType="VARCHAR" property="ruleId" />
+    <result column="store_id" jdbcType="VARCHAR" property="storeId" />
+    <result column="data_source_id" jdbcType="VARCHAR" property="dataSourceId" />
+    <result column="sqlldr_info_id" jdbcType="VARCHAR" property="sqlldrInfoId" />
+    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
+    <result column="business_name" jdbcType="VARCHAR" property="businessName" />
+    <result column="task_status" jdbcType="CHAR" property="taskStatus" />
+    <result column="task_type" jdbcType="CHAR" property="taskType" />
+    <result column="corn_tab" jdbcType="VARCHAR" property="cornTab" />
+    <result column="next_start_time" jdbcType="TIMESTAMP" property="nextStartTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="data_interval_value" jdbcType="INTEGER" property="dataIntervalValue" />
+    <result column="data_interval_unit" jdbcType="CHAR" property="dataIntervalUnit" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, task_id, rule_id, store_id, data_source_id, sqlldr_info_id, task_name, business_name, 
+    task_status, task_type, corn_tab, next_start_time, update_time,
+    data_interval_value, data_interval_unit
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_import_task
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByPage" resultType="com.jy.importservice.entity.ImportTask">
+    select t.id, t.store_id storeId, t.data_source_id dataSourceId, r.rule_name ruleName,
+           task_name taskName, task_type taskType, l.start_time startTime, next_start_time nextStartTime, task_status taskStatus
+    from t_import_task t
+    left join t_import_task_log l on t.task_id = l.task_id
+    inner join t_import_rule r on t.rule_id = r.rule_id
+    <where>
+      <if test="taskName != null and taskName != ''">
+        and task_name = #{taskName}
+      </if>
+      <if test="taskType != null and taskType != ''">
+        and task_type = #{taskType}
+      </if>
+      <if test="taskStatus != null and taskStatus != ''">
+        and task_status = #{taskStatus}
+      </if>
+    </where>
+    order by id asc
+    limit #{pageNo}, #{pageSize}
+  </select>
+  <select id="selectTotalSize" resultType="java.lang.Long">
+    select count(1)
+    from t_import_task
+  </select>
+  <select id="selectDetailsById" resultType="com.jy.importservice.entity.ImportTask">
+    select business_name businessName, data_interval_value dataIntervalValue,
+           data_interval_unit dataIntervalUnit, next_start_time nextStartTime, corn_tab cornTab
+    from t_import_task
+    where id = #{id}
+  </select>
+  <select id="lockResource" resultType="java.lang.Integer">
+    select 1
+    from t_import_task
+    where id = #{id}
+    limit 1
+    for update
+  </select>
+  <select id="lockResources" resultType="java.lang.Long" parameterType="list">
+    select count(1)
+    from t_import_task
+    <where>
+      <foreach collection="ids" item="id">
+        or id like #{id}
+      </foreach>
+    </where>
+  </select>
+  <select id="selectTaskIds" resultType="java.lang.String">
+    select task_id taskId
+    from t_import_task
+    <where>
+      <foreach collection="ids" item="id">
+        or id like #{id}
+      </foreach>
+    </where>
+  </select>
+  <select id="selectByTaskId" resultType="com.jy.importservice.entity.ImportTask">
+    select id, rule_id ruleId, next_start_time nextStartTime, data_interval_value dataIntervalValue, data_interval_unit dataIntervalUnit
+    from t_import_task
+    where task_id = #{taskId}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_import_task
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByIds">
+    delete
+    from t_import_task
+    <where>
+      <foreach collection="ids" item="id">
+        or id like #{id}
+      </foreach>
+    </where>
+  </delete>
+  <insert id="insert" parameterType="com.jy.importservice.entity.ImportTask">
+    insert into t_import_task (id, task_id, rule_id, 
+      store_id, data_source_id, sqlldr_info_id, 
+      task_name, business_name,
+      task_status, task_type, corn_tab, 
+      next_start_time, update_time, data_interval_value, 
+      data_interval_unit
+      )
+    values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{ruleId,jdbcType=VARCHAR}, 
+      #{storeId,jdbcType=VARCHAR}, #{dataSourceId,jdbcType=VARCHAR}, #{sqlldrInfoId,jdbcType=VARCHAR}, 
+      #{taskName,jdbcType=VARCHAR}, #{businessName,jdbcType=VARCHAR},
+      #{taskStatus,jdbcType=CHAR}, #{taskType,jdbcType=CHAR}, #{cornTab,jdbcType=VARCHAR}, 
+      #{nextStartTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{dataIntervalValue,jdbcType=INTEGER}, 
+      #{dataIntervalUnit,jdbcType=CHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.jy.importservice.entity.ImportTask">
+    insert into t_import_task
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="ruleId != null">
+        rule_id,
+      </if>
+      <if test="storeId != null">
+        store_id,
+      </if>
+      <if test="dataSourceId != null">
+        data_source_id,
+      </if>
+      <if test="sqlldrInfoId != null">
+        sqlldr_info_id,
+      </if>
+      <if test="taskName != null">
+        task_name,
+      </if>
+      <if test="businessName != null">
+        business_name,
+      </if>
+      <if test="taskStatus != null">
+        task_status,
+      </if>
+      <if test="taskType != null">
+        task_type,
+      </if>
+      <if test="cornTab != null">
+        corn_tab,
+      </if>
+      <if test="nextStartTime != null">
+        next_start_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="dataIntervalValue != null">
+        data_interval_value,
+      </if>
+      <if test="dataIntervalUnit != null">
+        data_interval_unit,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="taskId != null">
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleId != null">
+        #{ruleId,jdbcType=VARCHAR},
+      </if>
+      <if test="storeId != null">
+        #{storeId,jdbcType=VARCHAR},
+      </if>
+      <if test="dataSourceId != null">
+        #{dataSourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="sqlldrInfoId != null">
+        #{sqlldrInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskName != null">
+        #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="businessName != null">
+        #{businessName,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null">
+        #{taskStatus,jdbcType=CHAR},
+      </if>
+      <if test="taskType != null">
+        #{taskType,jdbcType=CHAR},
+      </if>
+      <if test="cornTab != null">
+        #{cornTab,jdbcType=VARCHAR},
+      </if>
+      <if test="nextStartTime != null">
+        #{nextStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="dataIntervalValue != null">
+        #{dataIntervalValue,jdbcType=INTEGER},
+      </if>
+      <if test="dataIntervalUnit != null">
+        #{dataIntervalUnit,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jy.importservice.entity.ImportTask">
+    update t_import_task
+    <set>
+      <if test="taskId != null">
+        task_id = #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleId != null">
+        rule_id = #{ruleId,jdbcType=VARCHAR},
+      </if>
+      <if test="storeId != null">
+        store_id = #{storeId,jdbcType=VARCHAR},
+      </if>
+      <if test="dataSourceId != null">
+        data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="sqlldrInfoId != null">
+        sqlldr_info_id = #{sqlldrInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskName != null">
+        task_name = #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="businessName != null">
+        business_name = #{businessName,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null">
+        task_status = #{taskStatus,jdbcType=CHAR},
+      </if>
+      <if test="taskType != null">
+        task_type = #{taskType,jdbcType=CHAR},
+      </if>
+      <if test="cornTab != null">
+        corn_tab = #{cornTab,jdbcType=VARCHAR},
+      </if>
+      <if test="nextStartTime != null">
+        next_start_time = #{nextStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="dataIntervalValue != null">
+        data_interval_value = #{dataIntervalValue,jdbcType=INTEGER},
+      </if>
+      <if test="dataIntervalUnit != null">
+        data_interval_unit = #{dataIntervalUnit,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jy.importservice.entity.ImportTask">
+    update t_import_task
+    set task_id = #{taskId,jdbcType=VARCHAR},
+      rule_id = #{ruleId,jdbcType=VARCHAR},
+      store_id = #{storeId,jdbcType=VARCHAR},
+      data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      sqlldr_info_id = #{sqlldrInfoId,jdbcType=VARCHAR},
+      task_name = #{taskName,jdbcType=VARCHAR},
+      business_name = #{businessName,jdbcType=VARCHAR},
+      task_status = #{taskStatus,jdbcType=CHAR},
+      task_type = #{taskType,jdbcType=CHAR},
+      corn_tab = #{cornTab,jdbcType=VARCHAR},
+      next_start_time = #{nextStartTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      data_interval_value = #{dataIntervalValue,jdbcType=INTEGER},
+      data_interval_unit = #{dataIntervalUnit,jdbcType=CHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

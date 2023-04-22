@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jy.importservice.mapper.ImportRuleMapper">
+  <resultMap id="BaseResultMap" type="com.jy.importservice.entity.ImportRule">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="rule_id" jdbcType="VARCHAR" property="ruleId" />
+    <result column="data_source_id" jdbcType="VARCHAR" property="dataSourceId" />
+    <result column="sqlldr_info_id" jdbcType="VARCHAR" property="sqlldrInfoId" />
+    <result column="rule_name" jdbcType="VARCHAR" property="ruleName" />
+    <result column="seperator" jdbcType="VARCHAR" property="seperator" />
+    <result column="target_database" jdbcType="VARCHAR" property="targetDatabase" />
+    <result column="source_database" jdbcType="VARCHAR" property="sourceDatabase" />
+    <result column="load_type" jdbcType="CHAR" property="loadType" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="sqlldr_info_name" jdbcType="VARCHAR" property="sqlldrInfoName" />
+    <result column="rule_table_id" jdbcType="VARCHAR" property="ruleTableId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, rule_id, data_source_id, sqlldr_info_id, rule_name, seperator, target_database, 
+    source_database, load_type, update_time, sqlldr_info_name
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_import_rule
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByPage" resultType="com.jy.importservice.entity.ImportRule">
+    select r.id, r.data_source_id dataSourceId, s.sqlldr_info_name sqlldrInfoName, rule_name ruleName, source_database sourceDatabase, target_database targetDatabase, seperator seperator
+    from t_import_rule r, t_import_sqlldr_info s
+    where r.sqlldr_info_id = s.sqlldr_info_id
+    <if test="ruleName != null and ruleName != ''">
+      and rule_name like concat('%', #{ruleName}, '%')
+    </if>
+    <if test="sourceDatabase != null and sourceDatabase != ''">
+      and source_database like concat('%', #{sourceDatabase}, '%')
+    </if>
+    <if test="targetDatabase != null and targetDatabase != ''">
+      and target_database like concat('%', #{targetDatabase}, '%')
+    </if>
+    order by id asc
+    limit #{pageNo}, #{pageSize}
+  </select>
+  <select id="selectTotalSize" resultType="java.lang.Long">
+    select count(1)
+    from t_import_rule
+  </select>
+  <select id="selectById" resultType="com.jy.importservice.entity.ImportRule">
+    select id, load_type loadType
+    from t_import_rule
+    where id = #{id}
+  </select>
+  <select id="lockResource" resultType="java.lang.Integer">
+    select 1
+    from t_import_rule
+    where id = #{id}
+    limit 1
+    for update
+  </select>
+  <select id="selectAllNames" resultType="com.jy.importservice.entity.ImportRule">
+    select rule_name ruleName, rule_id ruleId
+    from t_import_rule
+  </select>
+  <select id="selectSqlldrInfoIdByRuleId" resultType="com.jy.importservice.entity.ImportRule">
+    select sqlldr_info_id sqlldrInfoId
+    from t_import_rule
+    where rule_id = #{ruleId}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_import_rule
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.jy.importservice.entity.ImportRule">
+    insert into t_import_rule (id, rule_id, data_source_id, 
+      sqlldr_info_id, rule_name, seperator, 
+      target_database, source_database, load_type, 
+      update_time, sqlldr_info_name, rule_table_id
+      )
+    values (#{id,jdbcType=BIGINT}, #{ruleId,jdbcType=VARCHAR}, #{dataSourceId,jdbcType=VARCHAR}, 
+      #{sqlldrInfoId,jdbcType=VARCHAR}, #{ruleName,jdbcType=VARCHAR}, #{seperator,jdbcType=VARCHAR}, 
+      #{targetDatabase,jdbcType=VARCHAR}, #{sourceDatabase,jdbcType=VARCHAR}, #{loadType,jdbcType=CHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{sqlldrInfoName,jdbcType=VARCHAR}, #{ruleTableId,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.jy.importservice.entity.ImportRule">
+    insert into t_import_rule
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="ruleId != null">
+        rule_id,
+      </if>
+      <if test="dataSourceId != null">
+        data_source_id,
+      </if>
+      <if test="sqlldrInfoId != null">
+        sqlldr_info_id,
+      </if>
+      <if test="ruleName != null">
+        rule_name,
+      </if>
+      <if test="seperator != null">
+        seperator,
+      </if>
+      <if test="targetDatabase != null">
+        target_database,
+      </if>
+      <if test="sourceDatabase != null">
+        source_database,
+      </if>
+      <if test="loadType != null">
+        load_type,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="sqlldrInfoName != null">
+        sqlldr_info_name,
+      </if>
+      <if test="ruleTableId != null">
+        rule_table_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="ruleId != null">
+        #{ruleId,jdbcType=VARCHAR},
+      </if>
+      <if test="dataSourceId != null">
+        #{dataSourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="sqlldrInfoId != null">
+        #{sqlldrInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleName != null">
+        #{ruleName,jdbcType=VARCHAR},
+      </if>
+      <if test="seperator != null">
+        #{seperator,jdbcType=VARCHAR},
+      </if>
+      <if test="targetDatabase != null">
+        #{targetDatabase,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDatabase != null">
+        #{sourceDatabase,jdbcType=VARCHAR},
+      </if>
+      <if test="loadType != null">
+        #{loadType,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sqlldrInfoName != null">
+        #{sqlldrInfoName,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleTableId != null">
+        #{ruleTableId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jy.importservice.entity.ImportRule">
+    update t_import_rule
+    <set>
+      <if test="ruleId != null">
+        rule_id = #{ruleId,jdbcType=VARCHAR},
+      </if>
+      <if test="dataSourceId != null">
+        data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="sqlldrInfoId != null">
+        sqlldr_info_id = #{sqlldrInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleName != null">
+        rule_name = #{ruleName,jdbcType=VARCHAR},
+      </if>
+      <if test="seperator != null">
+        seperator = #{seperator,jdbcType=VARCHAR},
+      </if>
+      <if test="targetDatabase != null">
+        target_database = #{targetDatabase,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDatabase != null">
+        source_database = #{sourceDatabase,jdbcType=VARCHAR},
+      </if>
+      <if test="loadType != null">
+        load_type = #{loadType,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sqlldrInfoName != null">
+        sqlldr_info_name = #{sqlldrInfoName,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleTableId != null">
+        rule_table_id = #{ruleTableId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jy.importservice.entity.ImportRule">
+    update t_import_rule
+    set rule_id = #{ruleId,jdbcType=VARCHAR},
+      data_source_id = #{dataSourceId,jdbcType=VARCHAR},
+      sqlldr_info_id = #{sqlldrInfoId,jdbcType=VARCHAR},
+      rule_name = #{ruleName,jdbcType=VARCHAR},
+      seperator = #{seperator,jdbcType=VARCHAR},
+      target_database = #{targetDatabase,jdbcType=VARCHAR},
+      source_database = #{sourceDatabase,jdbcType=VARCHAR},
+      load_type = #{loadType,jdbcType=CHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      sqlldr_info_name = #{sqlldrInfoName,jdbcType=VARCHAR},
+      rule_table_id = #{ruleTableId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

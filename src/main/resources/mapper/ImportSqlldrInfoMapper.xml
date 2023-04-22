@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jy.importservice.mapper.ImportSqlldrInfoMapper">
+  <resultMap id="BaseResultMap" type="com.jy.importservice.entity.ImportSqlldrInfo">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="sqlldr_info_id" jdbcType="VARCHAR" property="sqlldrInfoId" />
+    <result column="sqlldr_info_name" jdbcType="VARCHAR" property="sqlldrInfoName" />
+    <result column="tns_url" jdbcType="VARCHAR" property="tnsUrl" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="sqlldr_url" jdbcType="VARCHAR" property="sqlldrUrl" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, sqlldr_info_id, sqlldr_info_name, tns_url, update_time, sqlldr_url
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_import_sqlldr_info
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByPage" resultType="com.jy.importservice.entity.ImportSqlldrInfo">
+    select id, sqlldr_info_name sqlldrInfoName, tns_url tnsUrl, sqlldr_url sqlldrUrl
+    from t_import_sqlldr_info
+    <where>
+      <if test="sqlldrInfoName != null and sqlldrInfoName != ''">
+        and sqlldr_info_name like concat('%', #{sqlldrInfoName}, '%')
+      </if>
+    </where>
+    order by id asc
+    limit #{pageNo}, #{pageSize}
+  </select>
+  <select id="selectAllNames" resultType="importSqlldrInfo">
+    select sqlldr_info_name sqlldrInfoName, sqlldr_info_id sqlldrInfoId
+    from t_import_sqlldr_info
+  </select>
+  <select id="lockResource" resultType="java.lang.Integer">
+    select 1
+    from t_import_sqlldr_info
+    where id = #{id}
+    limit 1
+    for update
+  </select>
+  <select id="selectTotalSize" resultType="java.lang.Long">
+    select count(1)
+    from t_import_sqlldr_info
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_import_sqlldr_info
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.jy.importservice.entity.ImportSqlldrInfo">
+    insert into t_import_sqlldr_info (id, sqlldr_info_id, sqlldr_info_name, 
+      tns_url, update_time, sqlldr_url
+      )
+    values (#{id,jdbcType=BIGINT}, #{sqlldrInfoId,jdbcType=VARCHAR}, #{sqlldrInfoName,jdbcType=VARCHAR}, 
+      #{tnsUrl,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{sqlldrUrl,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.jy.importservice.entity.ImportSqlldrInfo">
+    insert into t_import_sqlldr_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="sqlldrInfoId != null">
+        sqlldr_info_id,
+      </if>
+      <if test="sqlldrInfoName != null">
+        sqlldr_info_name,
+      </if>
+      <if test="tnsUrl != null">
+        tns_url,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="sqlldrUrl != null">
+        sqlldr_url,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="sqlldrInfoId != null">
+        #{sqlldrInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="sqlldrInfoName != null">
+        #{sqlldrInfoName,jdbcType=VARCHAR},
+      </if>
+      <if test="tnsUrl != null">
+        #{tnsUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sqlldrUrl != null">
+        #{sqlldrUrl,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jy.importservice.entity.ImportSqlldrInfo">
+    update t_import_sqlldr_info
+    <set>
+      <if test="sqlldrInfoId != null">
+        sqlldr_info_id = #{sqlldrInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="sqlldrInfoName != null">
+        sqlldr_info_name = #{sqlldrInfoName,jdbcType=VARCHAR},
+      </if>
+      <if test="tnsUrl != null">
+        tns_url = #{tnsUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sqlldrUrl != null">
+        sqlldr_url = #{sqlldrUrl,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jy.importservice.entity.ImportSqlldrInfo">
+    update t_import_sqlldr_info
+    set sqlldr_info_id = #{sqlldrInfoId,jdbcType=VARCHAR},
+      sqlldr_info_name = #{sqlldrInfoName,jdbcType=VARCHAR},
+      tns_url = #{tnsUrl,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      sqlldr_url = #{sqlldrUrl,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: import-service
+  datasource:
+    druid:
+      url: jdbc:mysql://10.211.55.8:3306/bus_import?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+      username: root
+      password: 26622600Zs
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      initial-size: 10
+      max-wait: 60000
+      min-idle: 10
+      max-active: 40
+  devtools:
+    livereload:
+      port: 35729
+      enabled: true
+    restart:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+server:
+  port: 10000
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.jy.importservice.entity
+  mapper-locations: classpath:mapper/*.xml
+http:
+  root: http://ops.jy.com:30089
+  uris:
+    - /data-pipeline-api/datasource/findAll
+    - /data-pipeline-api/metadata/getSchemas
+    - /data-pipeline-api/metadata/getTables
+    - /data-pipeline-api/metadata/getTableByColumn
+    - /data-pipeline-api/dictionary/findDataDictionary
+    - /data-pipeline-api/datastore/findAll
+date:
+  format: yyyy-MM-dd HH:mm:ss
+ctl:
+  content:  "LOAD DATA\nCHARACTERSET UTF8\nINFILE 'stdin'\nAPPEND INTO TABLE SO5.T_FREE_RES_FROM_JF_392\nFIELDS TERMINATED BY '$|$'\n\nTRAILING NULLCOLS\n(\n)"
