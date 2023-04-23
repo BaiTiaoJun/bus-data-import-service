@@ -49,6 +49,13 @@
                            enableDeleteByExample="false"
                            enableSelectByExample="false"
                            selectByExampleQueryId="false"/>
+
+        <table tableName="t_import_task_log" domainObjectName="ImportTaskLog"
+               enableCountByExample="false"
+               enableUpdateByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
     </context>
 
 </generatorConfiguration>

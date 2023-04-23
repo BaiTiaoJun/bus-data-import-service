@@ -61,6 +61,9 @@ public class ImportTaskServiceImpl implements ImportTaskService {
     private ImportRuleService importRuleService;
 
     @Resource
+    private ImportTaskLogService importTaskLogService;
+
+    @Resource
     private ImportSubTaskService importSubTaskService;
 
     @Override
@@ -280,12 +283,19 @@ public class ImportTaskServiceImpl implements ImportTaskService {
     public void deleteTask(Long[] ids, Long... ignore) throws GlobalException {
         //获取taskid
         Set<String> taskIds = importTaskMapper.selectTaskIds(ids);
+
         //获取subtask的id
         Set<Long> subtaskIds =  importSubTaskService.querySubtaskIds(taskIds);
-
         //删除子任务
         if (ObjectUtil.isNotNull(subtaskIds) && subtaskIds.size() > 0) {
             importSubTaskService.deleteSubTask(subtaskIds.toArray(new Long[0]));
+        }
+
+        //获取tasklog的id
+        Set<Long> taskLogIds = importTaskLogService.queryTaskLogIds(taskIds);
+        //删除子任务日志
+        if (ObjectUtil.isNotNull(taskLogIds) && taskLogIds.size() > 0) {
+            importTaskLogService.deleteTaskLog(taskLogIds.toArray(new Long[0]));
         }
 
         //锁定资源

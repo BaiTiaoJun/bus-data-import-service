@@ -18,4 +18,6 @@ public interface PrefixConstants {
     public static final String TASK_PREFIX = "task";
 
     public static final String TASK_LOG_PREFIX = "task_log";
+
+    String SUBTASK_PREFIX = "subtask";
 }

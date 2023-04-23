@@ -9,11 +9,9 @@ import com.jy.importservice.common.util.StringUtil;
 import com.jy.importservice.entity.ImportRuleTable;
 import com.jy.importservice.entity.ImportSubTask;
 import com.jy.importservice.entity.ImportTask;
+import com.jy.importservice.entity.ImportTaskLog;
 import com.jy.importservice.properties.CtlContentProperty;
-import com.jy.importservice.service.ImportRuleService;
-import com.jy.importservice.service.ImportRuleTableService;
-import com.jy.importservice.service.ImportSubTaskService;
-import com.jy.importservice.service.ImportTaskService;
+import com.jy.importservice.service.*;
 import lombok.SneakyThrows;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -36,6 +34,7 @@ public class FixedTimeTaskHandler extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) {
         ImportRuleService importRuleService = BeanFactoryUtil.getBean(ImportRuleService.class);
         ImportTaskService importTaskService = BeanFactoryUtil.getBean(ImportTaskService.class);
+        ImportTaskLogService importTaskLogService = BeanFactoryUtil.getBean(ImportTaskLogService.class);
         ImportSubTaskService importSubTaskService = BeanFactoryUtil.getBean(ImportSubTaskService.class);
         CtlContentProperty ctlContentProperty = BeanFactoryUtil.getBean(CtlContentProperty.class);
 
@@ -46,11 +45,9 @@ public class FixedTimeTaskHandler extends QuartzJobBean {
         // 根据id获取相关的任务信息
         ImportTask importTask = importTaskService.queryByTaskId(taskId);
 
-        Long id = importTask.getId();
-
         //更新任务执行状态
-        String taskStatus = String.valueOf(TaskStatusEnum.RUNNING.getCode());
-        importTaskService.modifyTask(ImportTask.builder().id(id).taskStatus(taskStatus).build(), null);
+//        String taskStatus = String.valueOf(TaskStatusEnum.RUNNING.getCode());
+//        importTaskService.modifyTask(ImportTask.builder().id(id).taskStatus(taskStatus).build(), null);
 
         //获取当前启动时间
         Date nextStartTime = importTask.getNextStartTime();
@@ -69,19 +66,19 @@ public class FixedTimeTaskHandler extends QuartzJobBean {
         //创建导入子任务
         ImportRuleTableService importRuleTableService = BeanFactoryUtil.getBean(ImportRuleTableService.class);
         List<ImportRuleTable> importRuleTables = importRuleTableService.queryByRuleId(ruleId);
-        ImportSubTask importSubTask;
+        ImportTaskLog importTaskLog;
         for (ImportRuleTable importRuleTable : importRuleTables) {
             String sourceTableName = importRuleTable.getSourceTableName();
-            //创建子任务日志
-            importSubTask = new ImportSubTask();
-            importSubTask.setTaskLogId(PrefixConstants.TASK_LOG_PREFIX + SnowFlakeUtil.getNextId());
+
+            //获取sqlldrInfoId
+            String sqlldrInfoId = importRuleService.selectSqlldrInfoIdByRuleId(ruleId).getSqlldrInfoId();
+
+            //创建子任务
+            ImportSubTask importSubTask = new ImportSubTask();
+            String subtaskId = StringUtil.concat(new StringBuffer(), PrefixConstants.SUBTASK_PREFIX, "_", String.valueOf(SnowFlakeUtil.getNextId()));
+            importSubTask.setSubtaskId(subtaskId);
+            importSubTask.setSqlldrInfoId(sqlldrInfoId);
             importSubTask.setTaskId(taskId);
-            importSubTask.setRuleTableId(importRuleTable.getRuleTableId());
-            importSubTask.setSqlldrInfoId(importRuleService.selectSqlldrInfoIdByRuleId(ruleId).getSqlldrInfoId());
-            importSubTask.setCircleTime(dataCircleTime);
-            importSubTask.setTableName(sourceTableName);
-            importSubTask.setSqlldrInfoName(importRuleTable.getSqlldrInfoName());
-            importSubTask.setTaskStatus(taskStatus);
             //创建并添加文件名称
             String sourceDatabase = importRuleTable.getSourceDatabase();
             String sourceSchema = importRuleTable.getSourceSchema();
@@ -94,14 +91,31 @@ public class FixedTimeTaskHandler extends QuartzJobBean {
             String content = ctlContentProperty.getContent();
             StringBuilder ctlFileContent = new StringBuilder(content);
             ctlFileContent.insert(content.indexOf('(') + 1, "\n" + targetColumnList);
-            importSubTask.setCtlFileContent(ctlFileContent.toString());
+            importSubTask.setCtlContext(ctlFileContent.toString());
             //添加子任务
             importSubTaskService.addImportSubTask(importSubTask);
+
+            //创建子任务日志
+            importTaskLog = new ImportTaskLog();
+            importTaskLog.setTaskLogId(StringUtil.concat(new StringBuffer(), PrefixConstants.TASK_LOG_PREFIX, "_", String.valueOf(SnowFlakeUtil.getNextId())));
+            importTaskLog.setTaskId(taskId);
+            importTaskLog.setRuleTableId(importRuleTable.getRuleTableId());
+            importTaskLog.setSqlldrInfoId(sqlldrInfoId);
+            importTaskLog.setCircleTime(dataCircleTime);
+            importTaskLog.setTableName(sourceTableName);
+            importTaskLog.setSqlldrInfoName(importRuleTable.getSqlldrInfoName());
+            importTaskLog.setTaskStatus(String.valueOf(TaskStatusEnum.NOT_START.getCode()));
+            importTaskLog.setSubtaskId(subtaskId);
+            importTaskLogService.addImportTaskLog(importTaskLog);
         }
 
-        //获取并更新下一次的执行时间
+        //更新最新执行时间和下一次的执行时间
+        ImportTask task = new ImportTask();
+        task.setId(importTask.getId());
+        task.setLatestStartTime(nextStartTime);
         nextStartTime = context.getTrigger().getNextFireTime();
-        importTaskService.modifyTask(
-                ImportTask.builder().id(id).nextStartTime(nextStartTime).updateTime(new Date()).build(), null);
+        task.setNextStartTime(nextStartTime);
+        task.setUpdateTime(new Date());
+        importTaskService.modifyTask(task, null);
     }
 }

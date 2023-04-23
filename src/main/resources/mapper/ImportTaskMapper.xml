@@ -14,13 +14,14 @@
     <result column="task_type" jdbcType="CHAR" property="taskType" />
     <result column="corn_tab" jdbcType="VARCHAR" property="cornTab" />
     <result column="next_start_time" jdbcType="TIMESTAMP" property="nextStartTime" />
+    <result column="latest_start_time" jdbcType="TIMESTAMP" property="latestStartTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="data_interval_value" jdbcType="INTEGER" property="dataIntervalValue" />
     <result column="data_interval_unit" jdbcType="CHAR" property="dataIntervalUnit" />
   </resultMap>
   <sql id="Base_Column_List">
     id, task_id, rule_id, store_id, data_source_id, sqlldr_info_id, task_name, business_name, 
-    task_status, task_type, corn_tab, next_start_time, update_time,
+    task_status, task_type, corn_tab, next_start_time, latest_start_time, update_time,
     data_interval_value, data_interval_unit
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -31,9 +32,8 @@
   </select>
   <select id="selectByPage" resultType="com.jy.importservice.entity.ImportTask">
     select t.id, t.store_id storeId, t.data_source_id dataSourceId, r.rule_name ruleName,
-           task_name taskName, task_type taskType, l.start_time startTime, next_start_time nextStartTime, task_status taskStatus
+           t.task_name taskName, t.task_type taskType, latest_start_time latestStartTime, t.next_start_time nextStartTime, t.task_status taskStatus
     from t_import_task t
-    left join t_import_task_log l on t.task_id = l.task_id
     inner join t_import_rule r on t.rule_id = r.rule_id
     <where>
       <if test="taskName != null and taskName != ''">
@@ -107,15 +107,15 @@
       store_id, data_source_id, sqlldr_info_id, 
       task_name, business_name,
       task_status, task_type, corn_tab, 
-      next_start_time, update_time, data_interval_value, 
+      next_start_time, latest_start_time, update_time, data_interval_value,
       data_interval_unit
       )
     values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{ruleId,jdbcType=VARCHAR}, 
       #{storeId,jdbcType=VARCHAR}, #{dataSourceId,jdbcType=VARCHAR}, #{sqlldrInfoId,jdbcType=VARCHAR}, 
       #{taskName,jdbcType=VARCHAR}, #{businessName,jdbcType=VARCHAR},
       #{taskStatus,jdbcType=CHAR}, #{taskType,jdbcType=CHAR}, #{cornTab,jdbcType=VARCHAR}, 
-      #{nextStartTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{dataIntervalValue,jdbcType=INTEGER}, 
-      #{dataIntervalUnit,jdbcType=CHAR}
+      #{nextStartTime,jdbcType=TIMESTAMP}, #{latestStartTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+      #{dataIntervalValue,jdbcType=INTEGER}, #{dataIntervalUnit,jdbcType=CHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.jy.importservice.entity.ImportTask">
@@ -156,6 +156,9 @@
       </if>
       <if test="nextStartTime != null">
         next_start_time,
+      </if>
+      <if test="latestStartTime != null">
+        latest_start_time,
       </if>
       <if test="updateTime != null">
         update_time,
@@ -204,6 +207,9 @@
       <if test="nextStartTime != null">
         #{nextStartTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="latestStartTime != null">
+        #{latestStartTime,jdbcType=TIMESTAMP},
+      </if>
       <if test="updateTime != null">
         #{updateTime,jdbcType=TIMESTAMP},
       </if>
@@ -251,6 +257,9 @@
       <if test="nextStartTime != null">
         next_start_time = #{nextStartTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="latestStartTime != null">
+        latest_start_time = #{latestStartTime,jdbcType=TIMESTAMP},
+      </if>
       <if test="updateTime != null">
         update_time = #{updateTime,jdbcType=TIMESTAMP},
       </if>
@@ -276,6 +285,7 @@
       task_type = #{taskType,jdbcType=CHAR},
       corn_tab = #{cornTab,jdbcType=VARCHAR},
       next_start_time = #{nextStartTime,jdbcType=TIMESTAMP},
+      latest_start_time = #{latestStartTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       data_interval_value = #{dataIntervalValue,jdbcType=INTEGER},
       data_interval_unit = #{dataIntervalUnit,jdbcType=CHAR}

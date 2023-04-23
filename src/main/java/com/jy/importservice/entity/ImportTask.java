@@ -43,6 +43,8 @@ public class ImportTask {
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date nextStartTime;
 
+    private Date latestStartTime;
+
     private Date updateTime;
 
     private Integer dataIntervalValue;

@@ -2,8 +2,8 @@ package com.jy.importservice.controller;
 
 import com.jy.importservice.common.exception.GlobalException;
 import com.jy.importservice.common.vo.ReturnVo;
-import com.jy.importservice.entity.ImportSubTask;
-import com.jy.importservice.service.ImportSubTaskService;
+import com.jy.importservice.entity.ImportTaskLog;
+import com.jy.importservice.service.ImportTaskLogService;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,29 +14,29 @@ import org.springframework.web.bind.annotation.*;
  * @版本 1.0
  */
 @RestController
-@RequestMapping("/subtask")
-public class ImportSubTaskController {
+@RequestMapping("/log")
+public class ImportTaskLogController {
 
-    private final ImportSubTaskService importSubTaskService;
+    private final ImportTaskLogService importTaskLogService;
 
-    public ImportSubTaskController(ImportSubTaskService importSubTaskService) {
-        this.importSubTaskService = importSubTaskService;
+    public ImportTaskLogController(ImportTaskLogService importTaskLogService) {
+        this.importTaskLogService = importTaskLogService;
     }
 
     @GetMapping("/query-by-page")
     public ReturnVo queryByPage(@RequestParam(defaultValue = "1") Long pageNo, @RequestParam(defaultValue = "10") Long pageSize, String taskStatus) {
-        return importSubTaskService.queryByPage(pageNo, pageSize, taskStatus);
+        return importTaskLogService.queryByPage(pageNo, pageSize, taskStatus);
     }
 
     @GetMapping("/details")
     public ReturnVo queryDetails(@RequestParam Long id, String tableName, String taskStatus) {
-        ImportSubTask log = importSubTaskService.queryDetails(id, tableName, taskStatus);
+        ImportTaskLog log = importTaskLogService.queryDetails(id, tableName, taskStatus);
         return ReturnVo.ok().put(log);
     }
 
     @DeleteMapping("/deletion")
-    public ReturnVo deleteSubTask(@RequestParam Long id) throws GlobalException {
-        importSubTaskService.deleteSubTask(id);
+    public ReturnVo deleteTaskLog(@RequestParam Long id) throws GlobalException {
+        importTaskLogService.deleteTaskLog(id);
         return ReturnVo.ok();
     }
 }
